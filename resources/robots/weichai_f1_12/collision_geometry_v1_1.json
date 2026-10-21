@@ -1,0 +1,96 @@
+{
+  "model": "weichai_f1_12",
+  "version": "1.1",
+  "units": "meter",
+  "collision_method": "convex calf hull clipped above complete ankle-foot sweep",
+  "calf_clip_min_z_m": -0.259,
+  "requested_vertical_clearance_m": 0.025,
+  "legs": {
+    "left": {
+      "ankle_pitch_limits_rad": [
+        -0.523599,
+        0.523599
+      ],
+      "ankle_roll_limits_rad": [
+        -0.523599,
+        0.523599
+      ],
+      "ankle_z_in_calf_frame_m": -0.33,
+      "max_foot_sweep_z_in_ankle_frame_m": 0.04537329696491941,
+      "foot_collision_sha256": "fe384fe6dfe4f4bdb71e762568f774e77d2ac6fcf11650f2881be2e328c2e5b8",
+      "source_mesh": "meshes/mujoco_stl/left_knee_pitch_e156674d2a81_exact_p01.stl",
+      "source_sha256": "c58197ba5dc214b8cb17807eb1a1afe2a6a2f3c539ca9e67ab81943dd27728bd",
+      "mesh": "meshes/collision/v1_1/left_knee_pitch_collision.stl",
+      "sha256": "b2b469529f0fcffcdee5b6c8033535fd490ae5b6ca6dd4b3b3e56629a0399e57",
+      "original_bounds_m": [
+        [
+          -0.05300271523243002,
+          -0.06541736139129856,
+          -0.3429999999960939
+        ],
+        [
+          0.05014822999413813,
+          0.02925007759827339,
+          0.04200000000130877
+        ]
+      ],
+      "bounds_m": [
+        [
+          -0.05276363873386907,
+          -0.06541736139129856,
+          -0.259
+        ],
+        [
+          0.05014822999413813,
+          0.02925007759827339,
+          0.04200000000130877
+        ]
+      ],
+      "volume_retained_fraction": 0.8246563943143023,
+      "minimum_vertical_sweep_clearance_m": 0.0256267030350806
+    },
+    "right": {
+      "ankle_pitch_limits_rad": [
+        -0.523599,
+        0.523599
+      ],
+      "ankle_roll_limits_rad": [
+        -0.523599,
+        0.523599
+      ],
+      "ankle_z_in_calf_frame_m": -0.33,
+      "max_foot_sweep_z_in_ankle_frame_m": 0.045374031243462384,
+      "foot_collision_sha256": "a4bed71af550d1e817099f310ff9ae42bb178a4df92b9aef11f0f68898acfb11",
+      "source_mesh": "meshes/mujoco_stl/right_knee_pitch_d7c98c8e9717_exact_p01.stl",
+      "source_sha256": "c60c1bb52f86cabd6fdcdf095b6caace69a3f08c13e14ea507412438ff1081c9",
+      "mesh": "meshes/collision/v1_1/right_knee_pitch_collision.stl",
+      "sha256": "b87e5a19e2ecc864aaf441cb9b1a3099419fc418015686d42199c200ab3146bd",
+      "original_bounds_m": [
+        [
+          -0.05300139655179791,
+          -0.029250077605850966,
+          -0.3429999999960939
+        ],
+        [
+          0.050149365014515064,
+          0.0654170601767629,
+          0.04200000000130877
+        ]
+      ],
+      "bounds_m": [
+        [
+          -0.052762320053236965,
+          -0.029250077605850966,
+          -0.259
+        ],
+        [
+          0.050149365014515064,
+          0.0654170601767629,
+          0.04200000000130877
+        ]
+      ],
+      "volume_retained_fraction": 0.8246626973863997,
+      "minimum_vertical_sweep_clearance_m": 0.025625968756537623
+    }
+  }
+}

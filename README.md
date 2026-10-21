@@ -13,6 +13,8 @@ The Weichai F1 task uses the X1 training and control framework with a custom-des
 | `x1_dh_stand` | `resources/robots/x1/` | `humanoid/envs/x1/` |
 | `weichai_f1_12_dh_stand` | `resources/robots/weichai_f1_12/` | `humanoid/envs/weichai_f1_12_config.py` |
 
+F1 model resources are **v1.1**, with calf collision hulls rebuilt to clear the ankle-foot sweep. See the [model notes and geometry validation](resources/robots/weichai_f1_12/README.md).
+
 The F1 robot has 12 controlled leg joints, ordered as six left-leg joints followed by six right-leg joints: hip pitch, hip roll, hip yaw, knee pitch, ankle pitch, and ankle roll on each side. Isaac Gym uses the URDF; MuJoCo sim2sim uses the MJCF. Keep joint names, joint order, actuator order, and the configuration arrays aligned when changing the model.
 
 F1 currently uses a zero-angle nominal joint pose and inherits X1 observation, control, reward, and PPO settings as an initial training baseline. These settings have not been calibrated for real hardware. A policy must be trained for the selected task and robot model; an X1 policy should not be assumed to control F1 correctly.

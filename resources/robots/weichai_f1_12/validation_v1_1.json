@@ -1,0 +1,70 @@
+{
+  "version": "1.1",
+  "mujoco_version": "3.15.0",
+  "on_disk_urdf_and_mjcf_relative_paths": "passed",
+  "baseline_zero_pose_contacts": [
+    {
+      "bodies": [
+        "left_knee_pitch_link",
+        "left_ankle_roll_link"
+      ],
+      "distance_m": -0.027935635889461928
+    },
+    {
+      "bodies": [
+        "left_knee_pitch_link",
+        "left_ankle_roll_link"
+      ],
+      "distance_m": -0.027935633804306477
+    },
+    {
+      "bodies": [
+        "right_knee_pitch_link",
+        "right_ankle_roll_link"
+      ],
+      "distance_m": -0.027935636043620125
+    },
+    {
+      "bodies": [
+        "right_knee_pitch_link",
+        "right_ankle_roll_link"
+      ],
+      "distance_m": -0.0279356362739238
+    }
+  ],
+  "analytical_minimum_vertical_clearance_m": {
+    "left": 0.0256266996972205,
+    "right": 0.025625965418677524
+  },
+  "checks": {
+    "urdf_import": {
+      "zero_pose_internal_contacts": 0,
+      "bent_stance_internal_contacts": 0,
+      "reference_gait_samples": 201,
+      "ankle_sweep_samples": 1681,
+      "minimum_sampled_calf_foot_distance_m": {
+        "left": 0.02974939506189894,
+        "right": 0.029750084557215097
+      },
+      "ground_contact_bodies": [
+        "left_ankle_roll_link",
+        "right_ankle_roll_link"
+      ]
+    },
+    "native_mjcf": {
+      "zero_pose_internal_contacts": 0,
+      "bent_stance_internal_contacts": 0,
+      "reference_gait_samples": 201,
+      "ankle_sweep_samples": 1681,
+      "minimum_sampled_calf_foot_distance_m": {
+        "left": 0.02974939506189894,
+        "right": 0.029750084557215097
+      },
+      "ground_contact_bodies": [
+        "left_ankle_roll_link",
+        "right_ankle_roll_link"
+      ]
+    }
+  },
+  "scope": "Local convex geometry regression. Isaac Gym/PhysX runtime and training performance not measured."
+}

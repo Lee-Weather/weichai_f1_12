@@ -13,6 +13,8 @@ Weichai F1 任务沿用 X1 的训练与控制框架，并为 Weichai F1 自主�
 | `x1_dh_stand` | `resources/robots/x1/` | `humanoid/envs/x1/` |
 | `weichai_f1_12_dh_stand` | `resources/robots/weichai_f1_12/` | `humanoid/envs/weichai_f1_12_config.py` |
 
+F1 模型资源当前版本为 **v1.1**，已重建小腿碰撞凸包，为踝关节带动脚掌运动的范围留出间隙。详见[模型说明与几何验证](resources/robots/weichai_f1_12/README.md)。
+
 F1 当前控制 12 个下肢关节，顺序为左腿 6 个、右腿 6 个；每条腿依次为髋俯仰、髋滚转、髋偏航、膝俯仰、踝俯仰、踝滚转。Isaac Gym 使用 URDF，MuJoCo sim2sim 使用 MJCF。修改模型时，需要保持关节名、关节顺序、执行器顺序和配置数组一致。
 
 F1 当前默认关节角为零位；观测、控制、奖励和 PPO 设置暂时继承 X1，作为初始训练基线，尚未针对真机完成标定。策略需要针对所选任务和机器人模型训练，不能默认 X1 策略可直接控制 F1。

@@ -1,5 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
-<robot name="X1_12DOF">
+<robot name="weichai_f1_12_v1_1">
+  <!-- Model resources v1.1: calf collision hulls clear the full ankle-foot sweep. -->
   <mujoco>
     <compiler meshdir="." balanceinertia="true" discardvisual="false" fusestatic="false" strippath="false" />
   </mujoco>
@@ -909,9 +910,9 @@
       </geometry>
     </visual>
     <collision name="left_knee_pitch_collision">
-      <origin xyz="-0 -0.18295 0.236" rpy="1.5708 0 1.5708" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="../meshes/mujoco_stl/left_knee_pitch_e156674d2a81_exact_p01.stl" scale="0.001 0.001 0.001" />
+        <mesh filename="../meshes/collision/v1_1/left_knee_pitch_collision.stl" scale="1 1 1" />
       </geometry>
     </collision>
   </link>
@@ -1023,9 +1024,9 @@
       </geometry>
     </visual>
     <collision name="right_knee_pitch_collision">
-      <origin xyz="-0 0.18295 0.236" rpy="1.5708 0 1.5708" />
+      <origin xyz="0 0 0" rpy="0 0 0" />
       <geometry>
-        <mesh filename="../meshes/mujoco_stl/right_knee_pitch_d7c98c8e9717_exact_p01.stl" scale="0.001 0.001 0.001" />
+        <mesh filename="../meshes/collision/v1_1/right_knee_pitch_collision.stl" scale="1 1 1" />
       </geometry>
     </collision>
   </link>

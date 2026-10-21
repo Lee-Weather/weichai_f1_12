@@ -1,4 +1,5 @@
-<mujoco model="X1_12DOF">
+<mujoco model="weichai_f1_12_v1_1">
+  <!-- Model resources v1.1: calf collision hulls clear the full ankle-foot sweep. -->
   <compiler angle="radian" meshdir="../meshes"/>
   <option timestep="0.001" gravity="0 0 -9.81" integrator="implicitfast"/>
   <default><geom friction="0.8 0.02 0.001" condim="3" solref="0.005 1"/></default>
@@ -51,7 +52,7 @@
     <mesh name="left_hip_yaw_8ef6f4d18c33_exact_p01" content_type="model/stl" file="../meshes/mujoco_stl/left_hip_yaw_8ef6f4d18c33_exact_p01.stl" scale="0.001 0.001 0.001"/>
     <mesh name="left_hip_yaw_471720ee8f8e_exact_p01" content_type="model/stl" file="../meshes/mujoco_stl/left_hip_yaw_471720ee8f8e_exact_p01.stl" scale="0.001 0.001 0.001"/>
     <mesh name="left_knee_pitch_bf14b2f4adf6_exact_full" content_type="model/stl" file="../meshes/mujoco_stl/left_knee_pitch_bf14b2f4adf6_exact_full.stl" scale="0.001 0.001 0.001"/>
-    <mesh name="left_knee_pitch_e156674d2a81_exact_p01" content_type="model/stl" file="../meshes/mujoco_stl/left_knee_pitch_e156674d2a81_exact_p01.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="left_knee_pitch_collision_v1_1" content_type="model/stl" file="../meshes/collision/v1_1/left_knee_pitch_collision.stl"/>
     <mesh name="right_ankle_pitch_8e9b0a8bc1fe_exact_p01" content_type="model/stl" file="../meshes/mujoco_stl/right_ankle_pitch_8e9b0a8bc1fe_exact_p01.stl" scale="0.001 0.001 0.001"/>
     <mesh name="right_ankle_pitch_7d98ef112fb6_exact_p01" content_type="model/stl" file="../meshes/mujoco_stl/right_ankle_pitch_7d98ef112fb6_exact_p01.stl" scale="0.001 0.001 0.001"/>
     <mesh name="right_ankle_roll_2ed2e9f3e86d_exact_p01" content_type="model/stl" file="../meshes/mujoco_stl/right_ankle_roll_2ed2e9f3e86d_exact_p01.stl" scale="0.001 0.001 0.001"/>
@@ -63,7 +64,7 @@
     <mesh name="right_hip_yaw_6564f9f3f26d_exact_p01" content_type="model/stl" file="../meshes/mujoco_stl/right_hip_yaw_6564f9f3f26d_exact_p01.stl" scale="0.001 0.001 0.001"/>
     <mesh name="right_hip_yaw_c55c04de30b5_exact_p01" content_type="model/stl" file="../meshes/mujoco_stl/right_hip_yaw_c55c04de30b5_exact_p01.stl" scale="0.001 0.001 0.001"/>
     <mesh name="right_knee_pitch_669ca5ac96b8_exact_full" content_type="model/stl" file="../meshes/mujoco_stl/right_knee_pitch_669ca5ac96b8_exact_full.stl" scale="0.001 0.001 0.001"/>
-    <mesh name="right_knee_pitch_d7c98c8e9717_exact_p01" content_type="model/stl" file="../meshes/mujoco_stl/right_knee_pitch_d7c98c8e9717_exact_p01.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="right_knee_pitch_collision_v1_1" content_type="model/stl" file="../meshes/collision/v1_1/right_knee_pitch_collision.stl"/>
   </asset>
 
   <worldbody>
@@ -232,7 +233,7 @@
               <inertial pos="-0.00579241 -0.020588 -0.153562" quat="0.813056 -0.0385819 0.0665698 0.577079" mass="2.20361" diaginertia="0.0176821 0.0174515 0.00191439"/>
               <joint name="left_knee_pitch_joint" range="0 1.5708" actuatorfrcrange="-130 130" damping="0.3" frictionloss="0.5" axis="0 1 0"/>
               <geom name="left_knee_pitch_visual_p01" pos="0 -0.18295 0.236" quat="0.499998 0.5 0.500002 0.5" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="left_knee_pitch_bf14b2f4adf6_exact_full"/>
-              <geom name="left_knee_pitch_collision" pos="0 -0.18295 0.236" quat="0.499998 0.5 0.500002 0.5" type="mesh" mesh="left_knee_pitch_e156674d2a81_exact_p01"/>
+              <geom name="left_knee_pitch_collision" pos="0 0 0" quat="1 0 0 0" type="mesh" mesh="left_knee_pitch_collision_v1_1"/>
               <body name="left_ankle_pitch_link" pos="0 -0.02695 -0.33">
                 <inertial pos="-0.00412939 -0.0060137 0" quat="0.328613 0.624286 -0.327314 0.628607" mass="0.124711" diaginertia="3.50366e-05 2.33567e-05 1.83917e-05"/>
                 <joint name="left_ankle_pitch_joint" range="-0.523599 0.523599" actuatorfrcrange="-241.875 241.875" damping="0.1" frictionloss="0.2" axis="0 1 0"/>
@@ -268,7 +269,7 @@
               <inertial pos="-0.00579527 0.0206028 -0.153543" quat="0.577175 0.0665964 -0.0385716 0.812986" mass="2.20229" diaginertia="0.0176799 0.0174483 0.00191341"/>
               <joint name="right_knee_pitch_joint" range="0 1.5708" actuatorfrcrange="-130 130" damping="0.3" frictionloss="0.5" axis="0 1 0"/>
               <geom name="right_knee_pitch_visual_p01" pos="0 0.18295 0.236" quat="0.499998 0.5 0.500002 0.5" type="mesh" contype="0" conaffinity="0" group="1" density="0" mesh="right_knee_pitch_669ca5ac96b8_exact_full"/>
-              <geom name="right_knee_pitch_collision" pos="0 0.18295 0.236" quat="0.499998 0.5 0.500002 0.5" type="mesh" mesh="right_knee_pitch_d7c98c8e9717_exact_p01"/>
+              <geom name="right_knee_pitch_collision" pos="0 0 0" quat="1 0 0 0" type="mesh" mesh="right_knee_pitch_collision_v1_1"/>
               <body name="right_ankle_pitch_link" pos="0 0.02695 -0.33">
                 <inertial pos="-0.00412939 0.0060137 0" quat="0.624286 0.328613 -0.628607 0.327314" mass="0.124711" diaginertia="3.50366e-05 2.33567e-05 1.83917e-05"/>
                 <joint name="right_ankle_pitch_joint" range="-0.523599 0.523599" actuatorfrcrange="-241.875 241.875" damping="0.1" frictionloss="0.2" axis="0 1 0"/>
