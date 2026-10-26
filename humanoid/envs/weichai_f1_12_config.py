@@ -45,14 +45,18 @@ class WeichaiF112Cfg(X1DHStandCfg):
         # of plantarflexion left, so the same gain tops out at 10.6 N*m while the
         # measured demand is 15-60 N*m. The exp_ada_6 policy paid for that by
         # commanding targets 1.4-1.9 rad outside the joint range (44-59 % of steps)
-        # and carrying a constant 0.41 rad PD error; 150 turns that bias into
-        # 0.41*35/150 = 0.10 rad and reaches 45 N*m at the 0.30 rad travel edge,
-        # still below 0.85*241.9 = 205 N*m over the full range. Damping keeps the
-        # inherited 14 ms damping/Kp ratio (zeta ~0.65 with armature 0.025).
+        # and carrying a constant 0.41 rad PD error. exp_ada_7 tried 150 and the
+        # policy never learned to stand (reward 18 vs exp_ada_5's 55 at iter 900,
+        # episode 463 vs 1075 steps, every posture/reference term collapsed while
+        # the torque-limit penalty went DOWN), so the ankle was too stiff rather
+        # than torque-starved. Halfway: 75 turns the 0.41 rad bias into
+        # 0.41*35/75 = 0.19 rad and reaches 0.31*75 = 23 N*m at the travel edge
+        # (2.2x the inherited 10.6 N*m), still far below 0.85*241.9 = 205 N*m.
+        # Damping keeps the inherited ~17 ms damping/Kp ratio used by exp_ada_7.
         stiffness = {**X1DHStandCfg.control.stiffness,
-                     'ankle_pitch_joint': 150}
+                     'ankle_pitch_joint': 75}
         damping = {**X1DHStandCfg.control.damping,
-                   'ankle_pitch_joint': 2.5}
+                   'ankle_pitch_joint': 1.25}
 
     class rewards(X1DHStandCfg.rewards):
         # Same rule for the swing reference: index 0 is left hip pitch, which must
