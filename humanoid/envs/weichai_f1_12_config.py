@@ -38,6 +38,22 @@ class WeichaiF112Cfg(X1DHStandCfg):
             'right_hip_roll_joint': 0.05,
         }
 
+    class control(X1DHStandCfg.control):
+        # PD gains are inherited from X1 except for the ankle pitch. X1's ankle has
+        # +-3.14 rad of travel, so Kp 35 still yields 35*3.14 = 110 N*m. F1's ankle
+        # stops at -0.5236 rad with the default already at -0.21, i.e. only 0.30 rad
+        # of plantarflexion left, so the same gain tops out at 10.6 N*m while the
+        # measured demand is 15-60 N*m. The exp_ada_6 policy paid for that by
+        # commanding targets 1.4-1.9 rad outside the joint range (44-59 % of steps)
+        # and carrying a constant 0.41 rad PD error; 150 turns that bias into
+        # 0.41*35/150 = 0.10 rad and reaches 45 N*m at the 0.30 rad travel edge,
+        # still below 0.85*241.9 = 205 N*m over the full range. Damping keeps the
+        # inherited 14 ms damping/Kp ratio (zeta ~0.65 with armature 0.025).
+        stiffness = {**X1DHStandCfg.control.stiffness,
+                     'ankle_pitch_joint': 150}
+        damping = {**X1DHStandCfg.control.damping,
+                   'ankle_pitch_joint': 2.5}
+
     class rewards(X1DHStandCfg.rewards):
         # Same rule for the swing reference: index 0 is left hip pitch, which must
         # match the right leg (index 6) at -0.25; indices 1/7 are the mirrored
@@ -47,6 +63,11 @@ class WeichaiF112Cfg(X1DHStandCfg):
         final_swing_joint_delta_pos[0] = -0.25
         final_swing_joint_delta_pos[1] = -0.05
         final_swing_joint_delta_pos[7] = 0.05
+        # X1's -0.16 puts the swing ankle at -0.37 rad, only 0.14 rad from F1's
+        # -0.5236 stop, so the reference itself saturates on every swing. Halving
+        # it keeps the sign of the X1 gait and doubles the remaining margin.
+        final_swing_joint_delta_pos[4] = -0.08
+        final_swing_joint_delta_pos[10] = -0.08
         # Calibrated on the F1 URDF at the default stance above (leg_metrics.py):
         # root-to-ankle 0.545 m + sole offset 0.034 m. X1's 0.61 target is above
         # F1's kinematic maximum (0.566 + 0.034 = 0.600 m fully straight).
