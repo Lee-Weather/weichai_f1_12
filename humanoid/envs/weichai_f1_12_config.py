@@ -33,20 +33,9 @@ class WeichaiF112Cfg(X1DHStandCfg):
         # delta [1]/[7] is flipped for the same reason.
         default_joint_angles = {
             **X1DHStandCfg.init_state.default_joint_angles,
-            'left_hip_pitch_joint': -0.56,
+            'left_hip_pitch_joint': -0.4,
             'left_hip_roll_joint': -0.05,
             'right_hip_roll_joint': 0.05,
-            # exp_ada_10: F1's knee is unilateral ([0, 1.5708]) like the ankle, so
-            # X1's 0.49 default leaves only 0.474 rad of extension and Kp 100 can
-            # ask for 47 N*m while the replay demanded 110 N*m (right knee was
-            # saturated 13.3 % of the time in exp_ada_9). Raising the default to
-            # 0.65 gives 0.634 rad (+34 %, 63 N*m) without touching the gains.
-            # The hip pitch moves with it (-0.56) so the foot pitch stays at the
-            # baseline -0.12 rad; FK (czy/analysis/exp_ada_10/knee_sweep.py):
-            # foot x +0.105 m, ankle z -0.5256 m, height 0.5596 m, mirror residual
-            # 0.0000 m, swing clearance 0.0387 -> 0.0490 m.
-            'left_knee_pitch_joint': 0.65,
-            'right_knee_pitch_joint': 0.65,
         }
 
     class control(X1DHStandCfg.control):
@@ -64,10 +53,23 @@ class WeichaiF112Cfg(X1DHStandCfg):
         # 0.41*35/75 = 0.19 rad and reaches 0.31*75 = 23 N*m at the travel edge
         # (2.2x the inherited 10.6 N*m), still far below 0.85*241.9 = 205 N*m.
         # Damping keeps the inherited ~17 ms damping/Kp ratio used by exp_ada_7.
+        #
+        # exp_ada_11: the knee has the same unilateral-travel problem. F1's knee
+        # stops at 0.0157 rad with the default at 0.49, so only 0.474 rad of
+        # extension is available (X1 has 3.63 rad); at Kp 100 that is 47 N*m while
+        # exp_ada_9's replay saturated the right knee 13.3 % of the time at
+        # 0.85*130 = 110.5 N*m with a 2.484 rad target overshoot. Raising the
+        # default angle to 0.65 instead (exp_ada_10) bought 63.4 N*m but cost the
+        # stance 3.5 cm of forward shift and 1.9 cm of height and the probe stalled
+        # (episode 1247 vs 1786 at iter 800). Keeping the exp_ada_9 stance and
+        # raising the gain is the cheaper lever: 0.474*140 = 66 N*m, damping keeps
+        # the same ~100 ms damping/Kp ratio as the inherited 10/100.
         stiffness = {**X1DHStandCfg.control.stiffness,
-                     'ankle_pitch_joint': 75}
+                     'ankle_pitch_joint': 75,
+                     'knee_pitch_joint': 140}
         damping = {**X1DHStandCfg.control.damping,
-                   'ankle_pitch_joint': 1.25}
+                   'ankle_pitch_joint': 1.25,
+                   'knee_pitch_joint': 14}
 
     class rewards(X1DHStandCfg.rewards):
         # Same rule for the swing reference: index 0 is left hip pitch, which must
@@ -86,10 +88,10 @@ class WeichaiF112Cfg(X1DHStandCfg):
         # Calibrated on the F1 URDF at the default stance above (leg_metrics.py):
         # root-to-ankle 0.545 m + sole offset 0.034 m. X1's 0.61 target is above
         # F1's kinematic maximum (0.566 + 0.034 = 0.600 m fully straight).
-        # exp_ada_10: the knee default 0.49 -> 0.65 shortens the leg, so the same
-        # FK gives root-to-ankle 0.5256 m (+0.034 = 0.5596). Keep the target at
-        # the achievable stance height instead of letting the reward fight the pose.
-        base_height_target = 0.560
+        # exp_ada_10 tried a 0.65 knee default (root-to-ankle 0.5256 m, target
+        # 0.560) but the probe stalled, so exp_ada_11 reverts the whole stance to
+        # this value and raises the knee gain instead.
+        base_height_target = 0.579
         # Measured on the F1 foot collision mesh; X1's value overstates it by 7 mm.
         feet_to_ankle_distance = 0.034
 
