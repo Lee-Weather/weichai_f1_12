@@ -54,22 +54,15 @@ class WeichaiF112Cfg(X1DHStandCfg):
         # (2.2x the inherited 10.6 N*m), still far below 0.85*241.9 = 205 N*m.
         # Damping keeps the inherited ~17 ms damping/Kp ratio used by exp_ada_7.
         #
-        # exp_ada_11: the knee has the same unilateral-travel problem. F1's knee
-        # stops at 0.0157 rad with the default at 0.49, so only 0.474 rad of
-        # extension is available (X1 has 3.63 rad); at Kp 100 that is 47 N*m while
-        # exp_ada_9's replay saturated the right knee 13.3 % of the time at
-        # 0.85*130 = 110.5 N*m with a 2.484 rad target overshoot. Raising the
-        # default angle to 0.65 instead (exp_ada_10) bought 63.4 N*m but cost the
-        # stance 3.5 cm of forward shift and 1.9 cm of height and the probe stalled
-        # (episode 1247 vs 1786 at iter 800). Keeping the exp_ada_9 stance and
-        # raising the gain is the cheaper lever: 0.474*140 = 66 N*m, damping keeps
-        # the same ~100 ms damping/Kp ratio as the inherited 10/100.
+        # exp_ada_11: tried the knee gain 100 -> 140 (damping 14) on this same
+        # stance and the policy collapsed (reward 25.7 / episode 734 at iter 799
+        # vs exp_ada_8's 65.6 / 1786, ref_joint_pos 0.49 -> 0.11). The knee is far
+        # more gain-sensitive than the ankle: 1.4x already breaks standing, so the
+        # knee keeps X1's 100 and its torque gap must be solved some other way.
         stiffness = {**X1DHStandCfg.control.stiffness,
-                     'ankle_pitch_joint': 75,
-                     'knee_pitch_joint': 140}
+                     'ankle_pitch_joint': 75}
         damping = {**X1DHStandCfg.control.damping,
-                   'ankle_pitch_joint': 1.25,
-                   'knee_pitch_joint': 14}
+                   'ankle_pitch_joint': 1.25}
 
     class rewards(X1DHStandCfg.rewards):
         # Same rule for the swing reference: index 0 is left hip pitch, which must
