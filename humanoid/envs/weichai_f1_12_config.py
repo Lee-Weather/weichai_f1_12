@@ -33,9 +33,20 @@ class WeichaiF112Cfg(X1DHStandCfg):
         # delta [1]/[7] is flipped for the same reason.
         default_joint_angles = {
             **X1DHStandCfg.init_state.default_joint_angles,
-            'left_hip_pitch_joint': -0.4,
+            'left_hip_pitch_joint': -0.56,
             'left_hip_roll_joint': -0.05,
             'right_hip_roll_joint': 0.05,
+            # exp_ada_10: F1's knee is unilateral ([0, 1.5708]) like the ankle, so
+            # X1's 0.49 default leaves only 0.474 rad of extension and Kp 100 can
+            # ask for 47 N*m while the replay demanded 110 N*m (right knee was
+            # saturated 13.3 % of the time in exp_ada_9). Raising the default to
+            # 0.65 gives 0.634 rad (+34 %, 63 N*m) without touching the gains.
+            # The hip pitch moves with it (-0.56) so the foot pitch stays at the
+            # baseline -0.12 rad; FK (czy/analysis/exp_ada_10/knee_sweep.py):
+            # foot x +0.105 m, ankle z -0.5256 m, height 0.5596 m, mirror residual
+            # 0.0000 m, swing clearance 0.0387 -> 0.0490 m.
+            'left_knee_pitch_joint': 0.65,
+            'right_knee_pitch_joint': 0.65,
         }
 
     class control(X1DHStandCfg.control):
@@ -75,7 +86,10 @@ class WeichaiF112Cfg(X1DHStandCfg):
         # Calibrated on the F1 URDF at the default stance above (leg_metrics.py):
         # root-to-ankle 0.545 m + sole offset 0.034 m. X1's 0.61 target is above
         # F1's kinematic maximum (0.566 + 0.034 = 0.600 m fully straight).
-        base_height_target = 0.579
+        # exp_ada_10: the knee default 0.49 -> 0.65 shortens the leg, so the same
+        # FK gives root-to-ankle 0.5256 m (+0.034 = 0.5596). Keep the target at
+        # the achievable stance height instead of letting the reward fight the pose.
+        base_height_target = 0.560
         # Measured on the F1 foot collision mesh; X1's value overstates it by 7 mm.
         feet_to_ankle_distance = 0.034
 
