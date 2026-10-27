@@ -57,12 +57,18 @@ class WeichaiF112Cfg(X1DHStandCfg):
         # exp_ada_11: tried the knee gain 100 -> 140 (damping 14) on this same
         # stance and the policy collapsed (reward 25.7 / episode 734 at iter 799
         # vs exp_ada_8's 65.6 / 1786, ref_joint_pos 0.49 -> 0.11). The knee is far
-        # more gain-sensitive than the ankle: 1.4x already breaks standing, so the
-        # knee keeps X1's 100 and its torque gap must be solved some other way.
+        # more gain-sensitive than the ankle: 1.4x already breaks standing.
+        #
+        # exp_ada_12: take the gentler half of that step instead, 100 -> 115 with
+        # damping 11.5 (same ~100 ms ratio). At 0.474 rad of extension travel that
+        # is 54 N*m versus the inherited 47, so it only trims the 2.484 rad
+        # overshoot exp_ada_9 needed; it is a probe, not an expected fix.
         stiffness = {**X1DHStandCfg.control.stiffness,
-                     'ankle_pitch_joint': 75}
+                     'ankle_pitch_joint': 75,
+                     'knee_pitch_joint': 115}
         damping = {**X1DHStandCfg.control.damping,
-                   'ankle_pitch_joint': 1.25}
+                   'ankle_pitch_joint': 1.25,
+                   'knee_pitch_joint': 11.5}
 
     class rewards(X1DHStandCfg.rewards):
         # Same rule for the swing reference: index 0 is left hip pitch, which must
