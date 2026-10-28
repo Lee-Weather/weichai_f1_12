@@ -63,12 +63,25 @@ class WeichaiF112Cfg(X1DHStandCfg):
         # damping 11.5 (same ~100 ms ratio). At 0.474 rad of extension travel that
         # is 54 N*m versus the inherited 47, so it only trims the 2.484 rad
         # overshoot exp_ada_9 needed; it is a probe, not an expected fix.
+        #
+        # exp_ada_15: the hip has the opposite problem - plenty of travel (+-1.54)
+        # but 3.18x X1's inertia about the hip axis (0.878 vs 0.276 kg*m^2, mostly
+        # F1's heavier shank and foot). At X1's Kp 30 the closed-loop bandwidth is
+        # only 5.85 rad/s and the replay showed large commands (|action| 0.67-0.87)
+        # with almost no motion (std 0.07-0.09 rad). A closed-loop replay sweep on
+        # the same checkpoint (czy/analysis/exp_ada_14/hip_kp_compare.py) gave:
+        # Kp 30 -> 50 -> 95 resets 6/6/5, hip p95 error 1.62 -> 1.59 -> 1.23 rad,
+        # 0.4 m/s stage vx -0.057 -> +0.028 -> +0.141, hip L/R correlation
+        # 0.589 -> 0.450 -> 0.235. 95/9.5 restores X1's 10.42 rad/s and zeta 0.52
+        # (95 * 1.54 = 146 N*m only saturates past 1.37 rad of error).
         stiffness = {**X1DHStandCfg.control.stiffness,
                      'ankle_pitch_joint': 75,
-                     'knee_pitch_joint': 115}
+                     'knee_pitch_joint': 115,
+                     'hip_pitch_joint': 95}
         damping = {**X1DHStandCfg.control.damping,
                    'ankle_pitch_joint': 1.25,
-                   'knee_pitch_joint': 11.5}
+                   'knee_pitch_joint': 11.5,
+                   'hip_pitch_joint': 9.5}
 
     class rewards(X1DHStandCfg.rewards):
         # Same rule for the swing reference: index 0 is left hip pitch, which must
