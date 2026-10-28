@@ -64,24 +64,25 @@ class WeichaiF112Cfg(X1DHStandCfg):
         # is 54 N*m versus the inherited 47, so it only trims the 2.484 rad
         # overshoot exp_ada_9 needed; it is a probe, not an expected fix.
         #
-        # exp_ada_15: the hip has the opposite problem - plenty of travel (+-1.54)
-        # but 3.18x X1's inertia about the hip axis (0.878 vs 0.276 kg*m^2, mostly
-        # F1's heavier shank and foot). At X1's Kp 30 the closed-loop bandwidth is
-        # only 5.85 rad/s and the replay showed large commands (|action| 0.67-0.87)
-        # with almost no motion (std 0.07-0.09 rad). A closed-loop replay sweep on
-        # the same checkpoint (czy/analysis/exp_ada_14/hip_kp_compare.py) gave:
-        # Kp 30 -> 50 -> 95 resets 6/6/5, hip p95 error 1.62 -> 1.59 -> 1.23 rad,
-        # 0.4 m/s stage vx -0.057 -> +0.028 -> +0.141, hip L/R correlation
-        # 0.589 -> 0.450 -> 0.235. 95/9.5 restores X1's 10.42 rad/s and zeta 0.52
-        # (95 * 1.54 = 146 N*m only saturates past 1.37 rad of error).
+        # exp_ada_15 tried the full inertia match (95/9.5) and FAILED from scratch:
+        # iter 799 reward 4.17 / episode 245 versus exp_ada_8's 65.56 / 1786, with
+        # reward stuck at 4-8 for the whole run. The replay gain at Kp 95 was a
+        # policy trained at Kp 30 re-run with a stiffer hip, so it does not carry
+        # over to learning from scratch. F1's hip is the worst case for that:
+        # 0.878 kg*m^2 but only 130 N*m of effort, so a large gain saturates the
+        # joint during the random-action phase and standing never forms.
+        # exp_ada_16 takes the intermediate value the replay already showed stable
+        # (Kp 50: resets 6, hip p95 error 1.59, 0.4 m/s stage vx +0.028) - 1.67x
+        # X1 - which is the order of magnitude the from-scratch runs tolerate
+        # (ankle 2.14x passed, knee 1.4x failed).
         stiffness = {**X1DHStandCfg.control.stiffness,
                      'ankle_pitch_joint': 75,
                      'knee_pitch_joint': 115,
-                     'hip_pitch_joint': 95}
+                     'hip_pitch_joint': 50}
         damping = {**X1DHStandCfg.control.damping,
                    'ankle_pitch_joint': 1.25,
                    'knee_pitch_joint': 11.5,
-                   'hip_pitch_joint': 9.5}
+                   'hip_pitch_joint': 4.9}
 
     class rewards(X1DHStandCfg.rewards):
         # Same rule for the swing reference: index 0 is left hip pitch, which must
