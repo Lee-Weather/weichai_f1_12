@@ -125,6 +125,23 @@ class WeichaiF112Cfg(X1DHStandCfg):
         # Measured on the F1 foot collision mesh; X1's value overstates it by 7 mm.
         feet_to_ankle_distance = 0.034
 
+        # exp_ada_20: the reference-side levers are exhausted (exp_ada_18 resume and
+        # exp_ada_19 from scratch both failed the gait gates with cycle_time 1.1,
+        # target_feet_height 0.05/0.10, swing knee 0.50). The remaining blocker is
+        # that standing is cheaper than stepping: under the same 0.4 command the
+        # policy earns 0.107/step standing versus 0.040/step while attempting a step
+        # (exp_ada_17 replay), because a step pays foot_slip (-0.1044) plus
+        # feet_contact_forces (-0.2358) while standing pays neither, and the
+        # exponential velocity kernel already pays ~0.53 at vx = 0.
+        # feet_air_time is intrinsically tiny (air time is clamped to 0.5 s and only
+        # credited at touchdown, so 1.2 -> 4.0 is worth only ~+0.015/step); the
+        # penalty cuts are what actually rebalance the trade-off, removing ~0.21
+        # of the ~0.34 per-step cost of a real step.
+        class scales(X1DHStandCfg.rewards.scales):
+            feet_air_time = 4.0
+            foot_slip = -0.03
+            feet_contact_forces = -0.004
+
 
 class WeichaiF112CfgPPO(X1DHStandCfgPPO):
     class runner(X1DHStandCfgPPO.runner):
