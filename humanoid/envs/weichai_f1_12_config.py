@@ -98,6 +98,23 @@ class WeichaiF112Cfg(X1DHStandCfg):
         # it keeps the sign of the X1 gait and doubles the remaining margin.
         final_swing_joint_delta_pos[4] = -0.08
         final_swing_joint_delta_pos[10] = -0.08
+        # exp_ada_17's replay settled the gait question: the policy already tracks the
+        # reference (ref_joint_pos 0.74, targets oscillating at 1.40-1.50 Hz) but the
+        # feet never leave the ground (sole height flat at 0.034 m, feet_air_time
+        # 0.0061, double support 85-100 %). Two F1-specific reasons:
+        #  1. X1's swing deltas put only 0.0326 m of horizontal travel and ~0.01 m of
+        #     lift on F1's foot, i.e. the reference itself is a shuffle. Raising the
+        #     swing knee 0.35 -> 0.50 and target_feet_height 0.03/0.06 -> 0.05/0.10
+        #     asks for a real step instead.
+        #  2. Hip bandwidth sits at the gait frequency: omega = sqrt(50/0.878) =
+        #     7.55 rad/s (1.20 Hz) versus cycle_time 0.7 s = 8.98 rad/s (1.43 Hz), so
+        #     the swing has to be completed in less time than the joint needs. At
+        #     1.1 s the reference drops to 5.71 rad/s, giving the hip a 1.32x margin.
+        cycle_time = 1.1
+        target_feet_height = 0.05
+        target_feet_height_max = 0.10
+        final_swing_joint_delta_pos[3] = 0.50
+        final_swing_joint_delta_pos[9] = 0.50
         # Calibrated on the F1 URDF at the default stance above (leg_metrics.py):
         # root-to-ankle 0.545 m + sole offset 0.034 m. X1's 0.61 target is above
         # F1's kinematic maximum (0.566 + 0.034 = 0.600 m fully straight).
