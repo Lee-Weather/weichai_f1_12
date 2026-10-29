@@ -125,22 +125,24 @@ class WeichaiF112Cfg(X1DHStandCfg):
         # Measured on the F1 foot collision mesh; X1's value overstates it by 7 mm.
         feet_to_ankle_distance = 0.034
 
-        # exp_ada_20: the reference-side levers are exhausted (exp_ada_18 resume and
-        # exp_ada_19 from scratch both failed the gait gates with cycle_time 1.1,
-        # target_feet_height 0.05/0.10, swing knee 0.50). The remaining blocker is
-        # that standing is cheaper than stepping: under the same 0.4 command the
-        # policy earns 0.107/step standing versus 0.040/step while attempting a step
-        # (exp_ada_17 replay), because a step pays foot_slip (-0.1044) plus
-        # feet_contact_forces (-0.2358) while standing pays neither, and the
-        # exponential velocity kernel already pays ~0.53 at vx = 0.
-        # feet_air_time is intrinsically tiny (air time is clamped to 0.5 s and only
-        # credited at touchdown, so 1.2 -> 4.0 is worth only ~+0.015/step); the
-        # penalty cuts are what actually rebalance the trade-off, removing ~0.21
-        # of the ~0.34 per-step cost of a real step.
+        # exp_ada_21: exp_ada_20's replay showed the rebalanced rewards pay for
+        # flailing rather than for moving. Touchdown counts rose 5-10x, but 45 of
+        # 80 airborne runs lasted < 0.05 s and every commanded stage ended in a
+        # backward fall (stage vx -0.112 / -0.141 / -0.362), because nothing in
+        # the reward says the step has to produce displacement: feet_air_time pays
+        # for lift, foot_slip was cut 3.3x and contact_forces 2.5x, while the
+        # velocity terms stayed at X1's weight. exp_ada_20's joint audit also
+        # closed the gain levers: hip_pitch averages 6 N*m of a 130 N*m limit
+        # with 0 % clipping, so the hip is not torque-starved and a higher Kp
+        # cannot create a gait. Pay for velocity instead, and make the hard
+        # tracking term (which subtracts 0.2*error on top of the exp kernel)
+        # worth twice as much so standing under a 0.4 command stops breaking even.
         class scales(X1DHStandCfg.rewards.scales):
             feet_air_time = 4.0
             foot_slip = -0.03
             feet_contact_forces = -0.004
+            tracking_lin_vel = 2.6
+            track_vel_hard = 1.0
 
 
 class WeichaiF112CfgPPO(X1DHStandCfgPPO):
