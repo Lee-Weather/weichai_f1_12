@@ -115,6 +115,9 @@ class X1DHStandEnv(LeggedRobot):
         self.last_feet_z = self.cfg.rewards.feet_to_ankle_distance
         self.feet_height = torch.zeros((self.num_envs, 2), device=self.device)
         self.ref_dof_pos = torch.zeros((self.num_envs, self.num_actions), device=self.device)      
+        # exp_ada_25: physical per-foot air time used by _reward_feet_air_time_ss,
+        # kept separate from feet_air_time so the inherited reward stays intact.
+        self.ss_air_time = torch.zeros((self.num_envs, 2), device=self.device)
 
 
     def _push_robots(self):
@@ -512,6 +515,7 @@ class X1DHStandEnv(LeggedRobot):
         self.last_dof_vel[env_ids] = 0.
         self.last_root_vel[env_ids] = 0.
         self.feet_air_time[env_ids] = 0.
+        self.ss_air_time[env_ids] = 0.
         self.episode_length_buf[env_ids] = 0
         self.phase_length_buf[env_ids] = 0
         self.reset_buf[env_ids] = 1
@@ -631,6 +635,39 @@ class X1DHStandEnv(LeggedRobot):
         air_time = self.feet_air_time.clamp(0, 0.5) * first_contact
         self.feet_air_time *= ~self.contact_filt
         return air_time.sum(dim=1)
+
+    def _reward_feet_air_time_ss(self):
+        """
+        exp_ada_25: air time credited only when the foot lands while the OTHER foot is
+        on the ground, i.e. for a real single-support step. The inherited term pays for
+        any lift (including both feet at once), which on F1 became a hop: exp_ada_23 did
+        5 cm of clearance 10-12 % of the time but 9.9 % of it was BOTH feet in the air,
+        with single support at only 7.5 %. Air time is measured physically (no reference
+        stance mask) and runs shorter than 2 control steps are discarded so that contact
+        flicker (< 0.05 s, 45 of 80 runs in exp_ada_20) earns nothing.
+        """
+        contact = self.contact_forces[:, self.feet_indices, 2] > 5.
+        other_contact = contact[:, [1, 0]]
+        self.ss_air_time += self.dt
+        # A foot that is in contact has its timer zeroed every step, so a value above
+        # 2*dt means the OTHER foot was airborne: that is a two-foot landing (hop), not
+        # a step, and pays nothing.
+        other_air = self.ss_air_time[:, [1, 0]]
+        landed = contact & other_contact & (self.ss_air_time > 2 * self.dt) \
+            & (other_air <= 2 * self.dt)
+        air_time = self.ss_air_time.clamp(0, 0.5) * landed
+        self.ss_air_time *= ~contact
+        return air_time.sum(dim=1)
+
+    def _reward_double_airborne(self):
+        """
+        exp_ada_25: penalize having both feet off the ground at once. F1 cannot roll its
+        flat sole (ankle pitch travel is only +-0.5236 rad), so a flight phase is a hop or
+        a fall, never a step. Returns 1.0 for the offending step, to be used with a small
+        negative scale.
+        """
+        contact = self.contact_forces[:, self.feet_indices, 2] > 5.
+        return (~torch.any(contact, dim=1)).float()
 
     def _reward_feet_contact_number(self):
         """

@@ -161,7 +161,21 @@ class WeichaiF112Cfg(X1DHStandCfg):
         # tracking term (which subtracts 0.2*error on top of the exp kernel)
         # worth twice as much so standing under a 0.4 command stops breaking even.
         class scales(X1DHStandCfg.rewards.scales):
-            feet_air_time = 4.0
+            # exp_ada_25: stop paying for the hop. The inherited feet_air_time pays for
+            # ANY lift, including both feet at once, and on F1 that became a two-foot
+            # bounce: exp_ada_23 shows 5 cm of sole clearance 10-12 % of the time but
+            # 9.9 % of it with BOTH feet up, while single support stays at 7.5 % and the
+            # 14 falls are fore-aft topples (pitch 14-27 deg half a second before the
+            # reset, |roll| <= 15 deg). Replace it with a real single-support air time
+            # (paid only when a foot lands while the other foot is on the ground and the
+            # flight lasted more than 2 control steps) and charge for double-airborne
+            # steps. Scales are multiplied by dt = 0.01 s, so double_airborne = -0.5 is
+            # -0.5 per second of flight: a 0.3-0.5 s hop costs 0.15-0.25 while one
+            # genuine landing pays at most 0.02, i.e. hopping is now strictly worse than
+            # standing and the velocity terms have to do the work of creating strides.
+            feet_air_time = 0.
+            feet_air_time_ss = 4.0
+            double_airborne = -0.5
             foot_slip = -0.03
             feet_contact_forces = -0.004
             tracking_lin_vel = 2.6
