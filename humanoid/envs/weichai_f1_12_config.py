@@ -90,7 +90,14 @@ class WeichaiF112Cfg(X1DHStandCfg):
         # hip-roll pair, so they must change sign together with the defaults.
         final_swing_joint_delta_pos = list(
             X1DHStandCfg.rewards.final_swing_joint_delta_pos)
-        final_swing_joint_delta_pos[0] = -0.25
+        # exp_ada_23: hip swing 0.25 -> 0.35 on BOTH legs (axis (0,1,0), so the same
+        # sign is correct). exp_ada_22 showed the knee cannot fix direction without
+        # losing lift: knee 0.38 put the swing foot forward but cut real swing
+        # phases 34 -> 12. The FK grid in czy/analysis/exp_ada_22/swing_grid.py
+        # shows hip -0.35 with knee 0.50 gives dx +0.0238 m forward AND 0.0611 m
+        # lift, so direction and clearance stop competing.
+        final_swing_joint_delta_pos[0] = -0.35
+        final_swing_joint_delta_pos[6] = -0.35
         final_swing_joint_delta_pos[1] = -0.05
         final_swing_joint_delta_pos[7] = 0.05
         # X1's -0.16 puts the swing ankle at -0.37 rad, only 0.14 rad from F1's
@@ -124,8 +131,13 @@ class WeichaiF112Cfg(X1DHStandCfg):
         # reference becomes a backward step. Lift and forward travel trade off
         # directly (3.0 cm at 0.30, 4.2 cm at 0.38, 5.2 cm at 0.50), so 0.38 keeps
         # 4.2 cm of clearance while restoring a forward stride.
-        final_swing_joint_delta_pos[3] = 0.38
-        final_swing_joint_delta_pos[9] = 0.38
+        # exp_ada_22 tried knee 0.38 (forward stride restored) but the policy then
+        # stopped stepping at all: real swing phases fell 34 -> 12 and the legs went
+        # back in phase (hip L/R correlation -0.19 -> +0.82). exp_ada_23 keeps the
+        # knee at 0.50 (0.0611 m lift with the larger hip swing) and buys the
+        # forward direction from the hip instead.
+        final_swing_joint_delta_pos[3] = 0.50
+        final_swing_joint_delta_pos[9] = 0.50
         # Calibrated on the F1 URDF at the default stance above (leg_metrics.py):
         # root-to-ankle 0.545 m + sole offset 0.034 m. X1's 0.61 target is above
         # F1's kinematic maximum (0.566 + 0.034 = 0.600 m fully straight).
