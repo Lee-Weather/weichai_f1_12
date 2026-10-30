@@ -75,14 +75,30 @@ class WeichaiF112Cfg(X1DHStandCfg):
         # (Kp 50: resets 6, hip p95 error 1.59, 0.4 m/s stage vx +0.028) - 1.67x
         # X1 - which is the order of magnitude the from-scratch runs tolerate
         # (ankle 2.14x passed, knee 1.4x failed).
+        # exp_ada_26: the last un-calibrated pair of joints is the LATERAL one.
+        # exp_ada_23's replay shows the policy cannot move its COM over one foot:
+        # single support 7.5 %, right hip roll carries a 0.48 rad PD error (left 0.27)
+        # and peaks at the 110.5 N*m clip, right ankle roll sits on its 0.513 stop with
+        # 11.7 % of raw targets out of range. exp_ada_25 then removed the hop income and
+        # charged -0.5/s for flight, and the policy STILL flew 7.6 % of the time, so the
+        # missing capability is weight transfer, not the incentive. Inertia-matched gains
+        # are hip_roll 66 / 4.9 (1.65x) and ankle_roll 73 / 1.0 (2.09x); take 1.5x and
+        # 1.43x instead, the corner the from-scratch runs already tolerate (hip_pitch 50
+        # trains while 95 fails, ankle pitch 75 trains while 150 fails). Torque headroom
+        # is large (hip_roll 19 N*m mean of 110.5, ankle_roll 6.8 of 205), so unlike the
+        # knee this is not a saturation trade.
         stiffness = {**X1DHStandCfg.control.stiffness,
                      'ankle_pitch_joint': 75,
                      'knee_pitch_joint': 115,
-                     'hip_pitch_joint': 50}
+                     'hip_pitch_joint': 50,
+                     'hip_roll_joint': 60,
+                     'ankle_roll_joint': 50}
         damping = {**X1DHStandCfg.control.damping,
                    'ankle_pitch_joint': 1.25,
                    'knee_pitch_joint': 11.5,
-                   'hip_pitch_joint': 4.9}
+                   'hip_pitch_joint': 4.9,
+                   'hip_roll_joint': 4.5,
+                   'ankle_roll_joint': 0.75}
 
     class rewards(X1DHStandCfg.rewards):
         # Same rule for the swing reference: index 0 is left hip pitch, which must
