@@ -113,8 +113,19 @@ class WeichaiF112Cfg(X1DHStandCfg):
         cycle_time = 1.1
         target_feet_height = 0.05
         target_feet_height_max = 0.10
-        final_swing_joint_delta_pos[3] = 0.50
-        final_swing_joint_delta_pos[9] = 0.50
+        # exp_ada_22: the swing knee goes 0.50 -> 0.38. exp_ada_21 finally learned an
+        # alternating gait (34 swing phases >= 0.15 s, hip L/R correlation -0.19) but
+        # walked BACKWARD at ~0.5 m/s under forward commands, and the reference was
+        # the reason: with cycle_time 1.1 s and hip delta -0.25, FK in
+        # czy/analysis/exp_ada_21/swing_sweep.py puts the swing foot 0.0384 m FORWARD
+        # of the default at knee delta 0.30, 0.0218 at 0.35, 0.0119 at 0.38, 0.0053
+        # at 0.40, and BEHIND it (-0.0270) at 0.50 - the sinusoid flexes the knee in
+        # the same phase as the hip, so past ~0.41 the retraction wins and the
+        # reference becomes a backward step. Lift and forward travel trade off
+        # directly (3.0 cm at 0.30, 4.2 cm at 0.38, 5.2 cm at 0.50), so 0.38 keeps
+        # 4.2 cm of clearance while restoring a forward stride.
+        final_swing_joint_delta_pos[3] = 0.38
+        final_swing_joint_delta_pos[9] = 0.38
         # Calibrated on the F1 URDF at the default stance above (leg_metrics.py):
         # root-to-ankle 0.545 m + sole offset 0.034 m. X1's 0.61 target is above
         # F1's kinematic maximum (0.566 + 0.034 = 0.600 m fully straight).
