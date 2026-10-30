@@ -100,6 +100,21 @@ class WeichaiF112Cfg(X1DHStandCfg):
                    'hip_roll_joint': 4.5,
                    'ankle_roll_joint': 0.75}
 
+    class commands(X1DHStandCfg.commands):
+        # exp_ada_27: the command range was still X1's `lin_vel_x = [-0.4, 1.2]` while
+        # every F1 policy so far only reaches ~0.14 m/s, so most sampled commands are
+        # unreachable for the robot: the exponential velocity kernel is flat near zero,
+        # `low_speed` degrades into a constant -1/-2 and `track_vel_hard` keeps
+        # subtracting 0.2*error on commands nobody can follow. That is why the probes
+        # stand instead of stepping, in every reward and gain variant. Sample only what
+        # is demonstrably reachable and let `update_command_curriculum` widen it later
+        # (it moves lin_vel_x by -0.25/+0.5 up to max_curriculum once tracking exceeds
+        # 80 % of the maximum, so 0.6 allows growth towards [-0.3, 0.6]).
+        max_curriculum = 0.6
+
+        class ranges(X1DHStandCfg.commands.ranges):
+            lin_vel_x = [-0.1, 0.4]
+
     class rewards(X1DHStandCfg.rewards):
         # Same rule for the swing reference: index 0 is left hip pitch, which must
         # match the right leg (index 6) at -0.25; indices 1/7 are the mirrored
