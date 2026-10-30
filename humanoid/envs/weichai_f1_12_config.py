@@ -200,13 +200,20 @@ class WeichaiF112Cfg(X1DHStandCfg):
             # reset, |roll| <= 15 deg). Replace it with a real single-support air time
             # (paid only when a foot lands while the other foot is on the ground and the
             # flight lasted more than 2 control steps) and charge for double-airborne
-            # steps. Scales are multiplied by dt = 0.01 s, so double_airborne = -0.5 is
-            # -0.5 per second of flight: a 0.3-0.5 s hop costs 0.15-0.25 while one
-            # genuine landing pays at most 0.02, i.e. hopping is now strictly worse than
-            # standing and the velocity terms have to do the work of creating strides.
+            # steps. Scales are multiplied by dt = 0.01 s, so a scale of -2.0 is -2.0
+            # per second of flight and one genuine landing pays at most 0.02.
             feet_air_time = 0.
             feet_air_time_ss = 4.0
-            double_airborne = -0.5
+            # exp_ada_28: with the reachable command range of exp_ada_27 the policy
+            # finally chases the command (track_vel_hard -0.0046 -> +0.0465, tracking
+            # 0.71 -> 1.17) but it pays for the speed by flying 25 % of the time and
+            # parking the joints on their soft limits (dof_pos_limits -0.27, base_height
+            # 0.0003). At -0.5/s that flight cost (-0.125/s) is far below the ~1.3/s the
+            # velocity terms pay for moving, so the trade is profitable. Price flight at
+            # -2/s instead: 25 % flight then costs 0.5/s, the same order as the velocity
+            # gap between standing and walking, so the policy has to keep a foot down to
+            # collect it.
+            double_airborne = -2.0
             foot_slip = -0.03
             feet_contact_forces = -0.004
             tracking_lin_vel = 2.6
