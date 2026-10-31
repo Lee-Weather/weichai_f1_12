@@ -233,6 +233,17 @@ class WeichaiF112Cfg(X1DHStandCfg):
             feet_contact_forces = -0.004
             tracking_lin_vel = 2.6
             track_vel_hard = 1.0
+            # exp_ada_32: exp_ada_31 reached reward 135.79 / episode 2122 / single
+            # support 49 % in training, yet BOTH replays (six-stage and a constant
+            # 0.4 m/s run) go backwards at 0.1-0.2 m/s with |vx-cmd| < 0.15 for only
+            # 12 % of the run. The reason is the score balance: posture/reference terms
+            # sum to ~2.9/s (ref_joint_pos 0.84, contact_number 1.10, single_support
+            # 0.49, orientation 0.33, height 0.078, clearance 0.078) while a command
+            # sign mismatch costs only -2 raw * 0.2 = -0.4/s through `low_speed`. So a
+            # regular-looking BACKWARD gait outscores a correct-direction one. Raise
+            # low_speed to 1.0 so a sign mismatch costs -2/s, the same order as the
+            # posture income, and direction stops being optional.
+            low_speed = 1.0
 
 
 class WeichaiF112CfgPPO(X1DHStandCfgPPO):
