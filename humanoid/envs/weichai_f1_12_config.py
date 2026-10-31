@@ -214,7 +214,22 @@ class WeichaiF112Cfg(X1DHStandCfg):
             # gap between standing and walking, so the policy has to keep a foot down to
             # collect it.
             double_airborne = -2.0
-            foot_slip = -0.03
+            # exp_ada_30: the exp_ada_29 video settled the mechanism. The reference
+            # applies ONE sine to all six joints, so the swing foot is already coming
+            # back down while it retracts - it scrapes the ground through the second half
+            # of the swing and pushes the body backwards. That is the constant backward
+            # drift (-0.13 m/s even at a zero command) and why single support never forms
+            # (5.5 %, double support 90.8 %, only one lift run >= 0.15 s per foot).
+            # Three changes, all on that mechanism:
+            #   foot_slip -0.03 -> -0.10 (X1's own weight, 3.3x the cost of scraping);
+            #   feet_clearance 1.0 -> 3.0 (the swing foot now has to reach 5-10 cm);
+            #   new `single_support` +1.0/s (exactly one foot in contact is paid, which
+            #   is the gait primitive that has never appeared in any run so far).
+            # Everything else (gains, command range, double_airborne, air-time rewards,
+            # reference geometry) stays frozen so this run answers one question only.
+            foot_slip = -0.10
+            feet_clearance = 3.0
+            single_support = 1.0
             feet_contact_forces = -0.004
             tracking_lin_vel = 2.6
             track_vel_hard = 1.0

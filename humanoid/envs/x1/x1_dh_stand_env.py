@@ -669,6 +669,16 @@ class X1DHStandEnv(LeggedRobot):
         contact = self.contact_forces[:, self.feet_indices, 2] > 5.
         return (~torch.any(contact, dim=1)).float()
 
+    def _reward_single_support(self):
+        """
+        exp_ada_30: pay for exactly one foot in contact, i.e. for standing on / swinging
+        off a single leg. This is the gait primitive that never appeared in exp_ada_2..29
+        (single support stayed at 3-8 %) because every existing term was satisfied by the
+        cheaper two-foot shuffle.
+        """
+        contact = self.contact_forces[:, self.feet_indices, 2] > 5.
+        return torch.sum(contact, dim=1).eq(1).float()
+
     def _reward_feet_contact_number(self):
         """
         Calculates a reward based on the number of feet contacts aligning with the gait phase. 
