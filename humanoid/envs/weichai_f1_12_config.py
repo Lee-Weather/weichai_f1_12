@@ -75,6 +75,18 @@ class WeichaiF112Cfg(X1DHStandCfg):
         # (Kp 50: resets 6, hip p95 error 1.59, 0.4 m/s stage vx +0.028) - 1.67x
         # X1 - which is the order of magnitude the from-scratch runs tolerate
         # (ankle 2.14x passed, knee 1.4x failed).
+        # exp_ada_34: the exp_ada_33 replay shows the hip is the only bandwidth-limited
+        # joint. Its actual excursion is 0.247 rad against the reference's 0.35 rad (71 %),
+        # while the knee/ankle sit far above their gait frequencies. At Kp 50 the hip
+        # closed-loop bandwidth is sqrt(50/0.878) = 7.55 rad/s = 1.20 Hz against a
+        # 1.1 s cycle (0.91 Hz), i.e. a 1.3x margin and ~45 deg of phase lag, which the
+        # instantaneous ref_joint_pos reward charges every step. Kp 70 gives 8.9 rad/s =
+        # 1.42 Hz (1.6x margin, ~33 deg lag) at a trivial torque cost: a 0.35 rad error
+        # is 24.5 N*m against the 110.5 N*m clip, and the hip only averages ~26 N*m.
+        # Kd 4.9 -> 5.8 keeps the damping ratio at ~0.37. History for scale: from
+        # scratch hip 95 collapsed (exp_ada_15) while 50 passed (exp_ada_16), so 70 from
+        # a warm start is the middle step.
+        #
         # exp_ada_26: the last un-calibrated pair of joints is the LATERAL one.
         # exp_ada_23's replay shows the policy cannot move its COM over one foot:
         # single support 7.5 %, right hip roll carries a 0.48 rad PD error (left 0.27)
@@ -90,13 +102,13 @@ class WeichaiF112Cfg(X1DHStandCfg):
         stiffness = {**X1DHStandCfg.control.stiffness,
                      'ankle_pitch_joint': 75,
                      'knee_pitch_joint': 115,
-                     'hip_pitch_joint': 50,
+                     'hip_pitch_joint': 70,
                      'hip_roll_joint': 60,
                      'ankle_roll_joint': 50}
         damping = {**X1DHStandCfg.control.damping,
                    'ankle_pitch_joint': 1.25,
                    'knee_pitch_joint': 11.5,
-                   'hip_pitch_joint': 4.9,
+                   'hip_pitch_joint': 5.8,
                    'hip_roll_joint': 4.5,
                    'ankle_roll_joint': 0.75}
 
