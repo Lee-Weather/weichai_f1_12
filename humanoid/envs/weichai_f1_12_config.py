@@ -178,6 +178,19 @@ class WeichaiF112Cfg(X1DHStandCfg):
         base_height_target = 0.579
         # Measured on the F1 foot collision mesh; X1's value overstates it by 7 mm.
         feet_to_ankle_distance = 0.034
+        # exp_ada_33: the exp_ada_32 replay (model_6599) is not walking backwards at
+        # all - with the 0.7 s before each reset removed the mean vx is -0.019 m/s,
+        # |vx| < 0.1 for 92 % of the run and the net world displacement is +0.03 m over
+        # 60 s. The negative stage means were fall transients. The policy simply
+        # STANDS. Why that is optimal: with tracking_sigma = 5, standing still under a
+        # 0.4 m/s command scores exp(-5*0.4^2) = 0.449 of the 2.6 tracking_lin_vel,
+        # i.e. 1.17/s, plus ~1.1/s of tracking_ang_vel (no yaw command) plus ~3.0/s of
+        # posture/reference terms = ~5.3/s, more than any gait can collect. Steepening
+        # the kernel to sigma = 20 drops that to exp(-3.2) = 0.04 (0.1/s), and with
+        # track_vel_hard (1.0 -> -0.06 at err 0.4) and low_speed (-0.4/s) standing
+        # under a command now loses ~4/s relative to moving, which no posture term can
+        # offset.
+        tracking_sigma = 20
 
         # exp_ada_21: exp_ada_20's replay showed the rebalanced rewards pay for
         # flailing rather than for moving. Touchdown counts rose 5-10x, but 45 of
