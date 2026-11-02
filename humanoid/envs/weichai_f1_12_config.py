@@ -139,8 +139,20 @@ class WeichaiF112Cfg(X1DHStandCfg):
         # phases 34 -> 12. The FK grid in czy/analysis/exp_ada_22/swing_grid.py
         # shows hip -0.35 with knee 0.50 gives dx +0.0238 m forward AND 0.0611 m
         # lift, so direction and clearance stop competing.
-        final_swing_joint_delta_pos[0] = -0.35
-        final_swing_joint_delta_pos[6] = -0.35
+        # exp_ada_35: the exp_ada_34 diagnostic settled the "train and replay disagree"
+        # question - there is NO pipeline bug (inject_command's obs equals the env's own
+        # obs to 0.0000). The numbers are self-consistent with a SMALL reference: a 0.35
+        # rad hip swing at a 1.1 s cycle encodes only 43 % of 4*0.024/1.1 = 0.086 m/s,
+        # the policy tracks it to ~85 % (ref_joint_pos 0.907 => ~0.09 rad rms per joint)
+        # and the result is the observed ~0.1 m per minute. To get a real stride the
+        # reference itself has to change. FK grid (swing_grid.py):
+        #   hip -0.45 / knee 0.40 -> dx +0.107 m (4.5x the current +0.024 m), lift 5.3 cm
+        #   (hip -0.35 / knee 0.50 -> dx +0.024 m, lift 6.1 cm)
+        # so a LARGER hip swing with a SMALLER knee delta buys stride without losing lift.
+        # cycle_time 1.4 s keeps the hip's 1.42 Hz bandwidth (Kp 70) 2x above the 0.71 Hz
+        # gait and lets the reference encode 4*0.107/1.4 = 0.31 m/s.
+        final_swing_joint_delta_pos[0] = -0.45
+        final_swing_joint_delta_pos[6] = -0.45
         final_swing_joint_delta_pos[1] = -0.05
         final_swing_joint_delta_pos[7] = 0.05
         # X1's -0.16 puts the swing ankle at -0.37 rad, only 0.14 rad from F1's
@@ -160,7 +172,7 @@ class WeichaiF112Cfg(X1DHStandCfg):
         #     7.55 rad/s (1.20 Hz) versus cycle_time 0.7 s = 8.98 rad/s (1.43 Hz), so
         #     the swing has to be completed in less time than the joint needs. At
         #     1.1 s the reference drops to 5.71 rad/s, giving the hip a 1.32x margin.
-        cycle_time = 1.1
+        cycle_time = 1.4
         target_feet_height = 0.05
         target_feet_height_max = 0.10
         # exp_ada_22: the swing knee goes 0.50 -> 0.38. exp_ada_21 finally learned an
@@ -179,8 +191,8 @@ class WeichaiF112Cfg(X1DHStandCfg):
         # back in phase (hip L/R correlation -0.19 -> +0.82). exp_ada_23 keeps the
         # knee at 0.50 (0.0611 m lift with the larger hip swing) and buys the
         # forward direction from the hip instead.
-        final_swing_joint_delta_pos[3] = 0.50
-        final_swing_joint_delta_pos[9] = 0.50
+        final_swing_joint_delta_pos[3] = 0.40
+        final_swing_joint_delta_pos[9] = 0.40
         # Calibrated on the F1 URDF at the default stance above (leg_metrics.py):
         # root-to-ankle 0.545 m + sole offset 0.034 m. X1's 0.61 target is above
         # F1's kinematic maximum (0.566 + 0.034 = 0.600 m fully straight).
