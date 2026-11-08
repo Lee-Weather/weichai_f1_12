@@ -43,6 +43,8 @@
 | exp_ada_33 | 2026-11-01 | 速度核锐化：`tracking_sigma` 5→**20**（exp(-20*0.4²)=0.04，站在指令下不再有利）。代码 `420b7c2`；从零 800 轮探针 | 探针通过。续训 3000 → 再 resume → 共 9599 轮。回放 `gm_play33_9598`：总位移 **-0.002m**（零！），S1 avg_vx=-0.126，S4 avg_vx=+0.009。**3 次重置（最优！）** | 失败（站得最稳，仍然不走） | TASK_20261101_xxx | limxee9c0vnil2sj@maxxspace.com | model_9598.pt |
 | exp_ada_34 | 2026-11-02 | 髋俯仰 Kp 50→**70**、Kd 4.9→5.8（1.4×，留 margin 不从零训练崩）。代码 `0ff1d20`；从 model_9599 续训 3000 → model_12599 | 回放 `gm_play34_12597`：总位移 **+0.044m**，S1 avg_vx=**+0.122**（首次正均速！），但 S2 avg_vx=-0.128，S4 avg_vx=+0.008。髋响应改善但**还不够** | 部分成功 | TASK_20261102_xxx | limxee9c0vnil2sj@maxxspace.com | model_12597.pt |
 | exp_ada_35 | 2026-11-03 | 参考步幅放大：髋 -0.35→**-0.45**，膝 0.50→**0.40**，cycle_time 1.1→**1.4s**（编码 4*0.107/1.4=0.31m/s）。FK：dx **+0.107m**（4.5×），抬脚 **5.3cm**。代码 `73be070`；从零 3000 轮 | 训练跑满：reward 106.49 / episode 2115。回放 `gm_play35_3000`：总位移 **+0.006m**，S1 avg_vx=**+0.002**，S4 avg_vx=+0.020。结论：**参考放大后政策反而更缩**——更大步幅风险使政策选择更保守的站立 | 失败 | TASK_20261102_131 | limx1c5eccw64on4@maxxspace.com | model_3000.pt |
+| exp_ada_36 | 2026-11-06 | **SSOT V1.1 URDF 更换**——与 exp_ada_35 参数完全一致（髋 -0.45 / 膝 0.40 / cycle 1.4s / 髋 Kp 70 / 膝 Kp 115 / 踝 Kp 75），仅 URDF 替换为 SSOT V1.1 规范版本，代码 `89f3441`；从零 3000 轮 | **任务作废**：启动时 `89f3441` 未推送，平台 clone 到旧 `73be070`，实际跑的是旧 URDF ≈ exp_ada_35 重复；有效运行见 exp_ada_36b | 作废 | TASK_20261106_274 | limxeea02lu2w1jc@maxxspace.com | — |
+| exp_ada_36b | 2026-11-08 | exp_ada_36 重跑：推送 `89f3441` 后重建任务，参数不变（髋 -0.45 / 膝 0.40 / cycle 1.4s / 髋 Kp 70 / 膝 Kp 115 / 踝 Kp 75），SSOT V1.1 URDF；从零 3000 轮 | 训练中 | TASK_20261108_xxx | limxeea02lu2w1jc@maxxspace.com | — |
 
 ## 探针验收标准（2026-10-29 起）
 
@@ -1737,4 +1739,42 @@ GPU 1×4090D，runtime 5092s（约 85 分钟）。最终轮：
 2. **降幅**：髋摆动回到 -0.25，先学会"迈出第一步"再放大
 3. **非对称奖励**：前向速度正为奖励、负为高额 penalty，不与方向罚金对称
 4. **课程学习**：从产生最小移动到逐步扩大
-5. **考虑换控制方法**：如果均失败，考虑 PD → 位置/力矩混合或 WBC
+
+## 实验 exp_ada_36：SSOT V1.1 URDF 更换
+
+### 1. 背景
+
+exp_ada_35（大步幅 + 长周期）虽有最佳的训练指标（reward 106.49 / episode 2115），回放却证明政策更保守——总位移仅 +0.006m，解释是**更大步幅风险使政策选择缩回原地站**。
+
+在此之前，仓库使用的 URDF 是自主拼接版本。客户正式发布了 SSOT V1.1 规范版本的 F1 12DOF 模型，包含完整的几何、碰撞、惯性参数，以及规范的 mesh 组织方式。本轮实验目标是**验证原站姿、增益和参考步态在新 URDF 上是否保持相同行为**。
+
+### 2. 修改内容
+
+- 替换 `resources/robots/weichai_f1_12/urdf/weichai_f1_12.urdf` 为 SSOT V1.1 版本
+- 重新生成 `resources/robots/weichai_f1_12/mjcf/weichai_f1_12.xml`（MuJoCo 3.15.0 编译）
+- 重新组织 mesh 目录：`visual/`、`collision/`、`x1/`
+- 腿部位姿命名去掉 `_link` 后缀（与 SSOT 规范对齐）
+- 参数（exp_ada_35 继承）：
+  - 髋摆动增量 -0.45，膝摆动 0.40
+  - cycle_time 1.4s
+  - 髋 Kp 70 / 膝 Kp 115 / 踝 Kp 75
+  - 奖励全部保持 exp_ada_35 值
+- 代码 commit: `89f3441`（重整为单一干净提交，剔除 `czy/analysis`、`czy/data`、`czy/resources` 大文件并 gitignore）
+
+### 3. 任务信息
+
+- Task ID: TASK_20261106_274
+- 账号: limxeea02lu2w1jc@maxxspace.com
+- 镜像: Isaac GYM preview-4 (V000412)
+- 算力: 1×4090D 24G
+- 从零训练 3000 轮
+
+### 4. 结果：任务作废（用了旧代码）
+
+- 2026-11-06 16:48 启动时 **commit `89f3441` 尚未推送**（网络受限，多次推送失败），远端 main 停在 `73be070`（exp_ada_35 旧 URDF）。平台在启动瞬间 clone，因此该任务实际跑的是**旧 URDF + exp_ada_35 参数 ≈ exp_ada_35 的重复运行**。
+- 任务于 18:11 结束（status 5，约 83 分钟），未做回放验证，**不作为 exp_ada_36 的数据**。
+- 教训：**必须先确认远端包含训练用 commit，再执行 `flux task run`**（flux-cli SKILL.md git-mirror 规则）。
+
+### 5. 后续
+
+- 2026-11-08：推送 `89f3441` 后重建任务 exp_ada_36b 并启动，作为 exp_ada_36 的有效运行。
