@@ -101,8 +101,8 @@ def main():
 
     clearances = {}
     for side, info in metadata["legs"].items():
-        collision = urdf.find(f"link[@name='{side}_knee_pitch_link']/collision")
-        foot = urdf.find(f"link[@name='{side}_ankle_roll_link']/collision")
+        collision = urdf.find(f"link[@name='{side}_knee_pitch']/collision")
+        foot = urdf.find(f"link[@name='{side}_ankle_roll']/collision")
         asset_path = ASSET / info["mesh"]
         assert hashlib.sha256(asset_path.read_bytes()).hexdigest() == info["sha256"]
         assert (URDF.parent / collision.find("geometry/mesh").get("filename")).resolve() == asset_path
@@ -171,7 +171,7 @@ def main():
         set_pose(model, data, np.zeros(12), height=.5995)
         floor_contacts = contact_rows(model, data)
         feet = {name for c in floor_contacts for name in c["bodies"] if name != "world"}
-        assert feet == {"left_ankle_roll_link", "right_ankle_roll_link"}, (label, floor_contacts)
+        assert feet == {"left_ankle_roll", "right_ankle_roll"}, (label, floor_contacts)
         assert all("world" in c["bodies"] for c in floor_contacts), floor_contacts
         results[label] = {"zero_pose_internal_contacts": 0, "bent_stance_internal_contacts": 0,
                           "reference_gait_samples": 201, "ankle_sweep_samples": 1681,
