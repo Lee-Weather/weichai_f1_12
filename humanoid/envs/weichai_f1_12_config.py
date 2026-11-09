@@ -126,6 +126,8 @@ class WeichaiF112Cfg(X1DHStandCfg):
 
         class ranges(X1DHStandCfg.commands.ranges):
             lin_vel_x = [-0.1, 0.4]
+            lin_vel_y = [-0.1, 0.1]
+            ang_vel_yaw = [-0.3, 0.3]
 
     class rewards(X1DHStandCfg.rewards):
         # Same rule for the swing reference: index 0 is left hip pitch, which must
@@ -281,6 +283,7 @@ class WeichaiF112Cfg(X1DHStandCfg):
             # low_speed to 1.0 so a sign mismatch costs -2/s, the same order as the
             # posture income, and direction stops being optional.
             low_speed = 1.0
+            forward_progress = 8.0
 
 
 class WeichaiF112CfgPPO(X1DHStandCfgPPO):
