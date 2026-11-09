@@ -13,6 +13,9 @@ from humanoid.envs.x1.x1_dh_stand_config import X1DHStandCfg, X1DHStandCfgPPO
 
 class WeichaiF112Cfg(X1DHStandCfg):
     # Keep the complete X1 training configuration as the comparison baseline.
+    class terrain(X1DHStandCfg.terrain):
+        mesh_type = 'plane'
+
     class asset(X1DHStandCfg.asset):
         file = '{LEGGED_GYM_ROOT_DIR}/resources/robots/weichai_f1_12/urdf/weichai_f1_12.urdf'
         xml_file = '{LEGGED_GYM_ROOT_DIR}/resources/robots/weichai_f1_12/mjcf/weichai_f1_12.xml'
