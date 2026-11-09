@@ -950,8 +950,7 @@ class X1DHStandEnv(LeggedRobot):
         """exp_ada_37: linear forward-progress ramp under directional command.
         Stand=0, crawl~0.4/s, walk~3.2/s.
         """
-        progress = torch.clamp(
-            self.base_lin_vel[:, 0] * torch.sign(self.commands[:, 0]),
-            0.0,
-            torch.abs(self.commands[:, 0]))
-        return progress * (torch.abs(self.commands[:, 0]) > 0.05).float()
+        raw = self.base_lin_vel[:, 0] * torch.sign(self.commands[:, 0])
+        cap = torch.abs(self.commands[:, 0])
+        progress = torch.minimum(torch.maximum(raw, torch.zeros_like(raw)), cap)
+        return progress * (cap > 0.05).float()
